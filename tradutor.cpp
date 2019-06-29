@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <iostream>
 #include <list>
 
@@ -151,11 +152,100 @@ void preprocessing(string in_file, string out_file){
   printf ("\nfim pre processamento!");
   printf("\n -------------------------------------------- \n");
 }
+int instrucao(string instrucao){
+    if(instrucao=="add"){
+      return 1;
+    }
+    else if(instrucao=="sub"){
+      return 2;
+    }
+    else if(instrucao=="mult"){
+      return 3;
+    }
+    else if(instrucao=="div"){
+      return 4;
+    }
+    else if(instrucao=="jmp"){
+      return 5;
+    }
+    else if(instrucao =="jmpn"){
+      return 6;
+    }
+    else if(instrucao=="jmpp"){
+      return 7;
+    }
+    else if(instrucao=="jmpz"){
+      return 8;
+    }
+    else if(instrucao=="copy"){
+      return 9;
+    }
+    else if(instrucao=="load"){
+      return 10;
+    }
+    else if(instrucao=="store"){
+      return 11;
+    }
+    else if(instrucao=="input"){
+      return 12;
+    }
+    else if(instrucao=="output"){
+      return 13;
+    }
+    else if(instrucao=="stop"){
+      return 14;
+    }
+    else if (instrucao=="c_input") {
+      return 15;
+    }
+    else if (instrucao=="c_output") {
+      return 16;
+    }
+    else if (instrucao=="s_input") {
+      return 19;
+    }
+    else if (instrucao=="s_output") {
+      return 20;
+    }
+    else {
+      return 0;
+    }
+}
+
+int diretivas(string instrucao){
+  if(instrucao == "space"){
+    return 1;
+  }
+  else if(instrucao == "const"){
+    return 2;
+  }
+  else if(instrucao == "section") {
+    return 3;
+  }
+  else if(instrucao == "public") {
+    return 4;
+  }
+  else if(instrucao == "extern") {
+    return 5;
+  }
+  else if(instrucao == "begin") {
+    return 6;
+  }
+  else if (instrucao == "end") {
+    return 7;
+  }
+  else if (instrucao == "equ") {
+    return 8;
+  }
+  else {
+    return 0;
+  }
+}
 
 int main (int argc, char *argv[]){
 
   int i=0, parametro=1, mudaadic=0, mudarot=0, mudaop=0, mudaop1=0, mudaop2=0, num_op, num_dir, letrint, secao=0;
-  int num_space=0;
+  int num_space=0, op = 0, dir = 0;
   char letra;
   bool ok = false;
   string arquivo_input, arquivo_output, arquivo_precomp, linha, token;
@@ -186,52 +276,51 @@ int main (int argc, char *argv[]){
           if(linha.length()){
               found = linha.find("section");
               if(found==std::string::npos){// Pula linhas com section
-                //cout<<linha<<endl;
-                size_t found_dois_pontos = linha.find(":",0);// Acha se tem rotulo
-                if(found!=std::string::npos)rotulo = linha.substr(0, found_dois_pontos);
-                std::size_t found_primeiro_espaco = linha.find("\t",0);// Acha se tem rotulo
-
-                if(found_primeiro_espaco!=std::string::npos){
-                  std::size_t found_segundo_espaco = linha.find("\t",found_primeiro_espaco+1);// Checa se tem mais de um argumento
-                  if(found_dois_pontos!=std::string::npos)operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
-                  else operacao = linha.substr(0, found_primeiro_espaco);
-                  if(found_segundo_espaco!=std::string::npos){
-                    operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
-                    operando2 = linha.substr(found_segundo_espaco+1, linha.length() );
-                  }else{
-                    operando1 = linha.substr(found_primeiro_espaco+1, linha.length() );
-                  }
-                }else operacao = linha.substr(0, linha.length() ); //stop
+                  size_t found_dois_pontos = linha.find(":",0);// Acha se tem rotulo
+                  if(found!=std::string::npos)rotulo = linha.substr(0, found_dois_pontos);
+                  std::size_t found_primeiro_espaco = linha.find("\t",0);// Acha se tem rotulo
+                  if(found_primeiro_espaco!=std::string::npos){
+                      std::size_t found_segundo_espaco = linha.find("\t",found_primeiro_espaco+1);// Checa se tem mais de um argumento
+                      if(found_dois_pontos!=std::string::npos)operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                      else operacao = linha.substr(0, found_primeiro_espaco);
+                      if(found_segundo_espaco!=std::string::npos){
+                          operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                          operando2 = linha.substr(found_segundo_espaco+1, linha.length() );
+                      }else{
+                          operando1 = linha.substr(found_primeiro_espaco+1, linha.length() );
+                      }
+                  }else operacao = linha.substr(0, linha.length() ); //stop
               }else{
-                found = linha.find("\t");
-                operacao = linha.substr(0, found);
+                  found = linha.find("\t");
+                  operacao = linha.substr(0, found);
               }
               if(operacao == operando1){
-                operando1 = operando2;
-                operando2.erase(operando2.begin(), operando2.end());
+                  operando1 = operando2;
+                  operando2.erase(operando2.begin(), operando2.end());
+                  operacao.erase(std::remove(operacao.begin(), operacao.end(), '\t'), operacao.end());
               }
-              //cout<<i<<"\t"<<linha<<endl;
-              //i++;
+              cout<<i<<"\t"<<linha<<endl;
+              i++;
               //cout<<"op "<<operacao<<endl;
               //cout<<"op1 "<<operando1<<endl;
               //cout<<"op2 "<<operando2<<endl;
-                      /*num_op = descobreinstrucao(operacao);
-                      num_dir = descobrediretiva(operacao);
-                      if (num_dir == 3) {
-                      if (strcmp(operando1,"text") == 0) {
+              op = instrucao(operacao);
+              dir = diretivas(operacao);
+              //cout<<op<<endl;
+              //cout<<dir<<endl;
+              //cout<<"------------"<<endl;
+              if (num_dir == 3) {
+                  if (operando1 == "text"){
                       secao = 0;
-                    }
-                    else if (strcmp(operando1,"data") == 0) {
-                    secao = 1;
                   }
-                  else if (strcmp(operando1,"bss") == 0) {
-                  secao = 2;
+                  else if(operando1 == "data") {
+                      secao = 1;
+                  }
+                  else if(operando1 == "bss") {
+                    secao = 2;
                 }
               }
-              converteia32(num_op, num_dir, entrada, saida, rotulo, operacao, operando1, operando2, adicionado, mudaop, mudaadic, mudarot, secao);
-              parametro = 1;
-              mudarot = 0; mudaop = 0; mudaop1 = 0; mudaop2 = 0; mudaadic = 0;
-              cout << endl;*/
+
               operacao.erase(operacao.begin(), operacao.end());
               operando1.erase(operando1.begin(), operando1.end());
               operando2.erase(operando2.begin(), operando2.end());
