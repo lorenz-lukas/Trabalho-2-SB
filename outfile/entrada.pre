@@ -1,0 +1,14 @@
+section	text
+input	b
+input	h
+load	b
+add	h
+store	r
+output	r
+stop
+section	bss
+b:	space
+h:	space
+r:	space
+section	data
+dois:	const	2
