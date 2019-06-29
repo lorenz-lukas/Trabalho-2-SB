@@ -1,4 +1,5 @@
 section	text
+copy	b	a
 input	b
 input	h
 load	b

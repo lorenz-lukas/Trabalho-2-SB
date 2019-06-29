@@ -74,6 +74,8 @@ void preprocessing(string in_file, string out_file){
                       if (parametro == 2 && mudaop1 == 0){
                         mudaop1 = 1;
                         operando1 = palavra;
+                        size_t found = operando1.find(",");
+                        if(found != string::npos) operando1 = operando1.substr(0, found);
                         cout<< "Operando1:\t" << operando1 << endl;
                       }
                       if (parametro == 3 && mudaop2 == 0){
@@ -128,7 +130,6 @@ void preprocessing(string in_file, string out_file){
                               if (mudaadic == 1) fs2 << "+" + adicionado;
                               fs2 << endl;
                          }
-                         cout<<"oi"<<endl;
                          ignoralinha = 0;
                     }
                   }
@@ -151,19 +152,19 @@ void preprocessing(string in_file, string out_file){
   printf("\n -------------------------------------------- \n");
 }
 
-
 int main (int argc, char *argv[]){
 
   int i=0, parametro=1, mudaadic=0, mudarot=0, mudaop=0, mudaop1=0, mudaop2=0, num_op, num_dir, letrint, secao=0;
-  char letra, rotulo[50], operacao[50],
-  operando1[50], operando2[50], adicionado[50];
-
+  int num_space=0;
+  char letra;
+  bool ok = false;
   string arquivo_input, arquivo_output, arquivo_precomp, linha, token;
-
+  string rotulo, operacao,operando1, operando2, adicionado;
   if(argc != 2) {
-    cout<< "[ERROR] Input parameters must be 2.\nExample: ./traduto entrada.asm" << endl;
-    exit(0);
+    cout<< "[ERROR] Input parameters must be 2.\nExample: ./tradutor entrada.asm" << endl;
+    return 0;
   }
+
   std::size_t found = string(argv[1]).find(".");
   if(found!=std::string::npos){
       arquivo_input = "infile/" +string(argv[1]);
@@ -182,35 +183,59 @@ int main (int argc, char *argv[]){
   {
       while(!fs1.eof()){
           getline(fs1, linha);
-          cout<< linha << endl;
-          for(i = 0; i <= linha.length(); i++){
-            letra = linha[i];
-            if (letra > 64 && letra < 91) letra = letra + 32; // CAPS LOCK
-            if (letra != ' ' && letra != '\n' && letra != '\t'  && letra != '+' && letra != ':') //verifica se o char faz parte de alguma palavra//
-                token += letra;
-            else{
-                //preencheparametro(&i, &parametro, &mudaadic, &mudarot, &mudaop, &mudaop1, &mudaop2, word, rotulo, operacao, operando1, operando2, letra, adicionado);
-                token.erase(token.begin(), token.end());
-            }
-            cout<< token << endl;
+          if(linha.length()){
+              found = linha.find("section");
+              if(found==std::string::npos){// Pula linhas com section
+                //cout<<linha<<endl;
+                size_t found_dois_pontos = linha.find(":",0);// Acha se tem rotulo
+                if(found!=std::string::npos)rotulo = linha.substr(0, found_dois_pontos);
+                std::size_t found_primeiro_espaco = linha.find("\t",0);// Acha se tem rotulo
+
+                if(found_primeiro_espaco!=std::string::npos){
+                  std::size_t found_segundo_espaco = linha.find("\t",found_primeiro_espaco+1);// Checa se tem mais de um argumento
+                  if(found_dois_pontos!=std::string::npos)operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                  else operacao = linha.substr(0, found_primeiro_espaco);
+                  if(found_segundo_espaco!=std::string::npos){
+                    operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                    operando2 = linha.substr(found_segundo_espaco+1, linha.length() );
+                  }else{
+                    operando1 = linha.substr(found_primeiro_espaco+1, linha.length() );
+                  }
+                }else operacao = linha.substr(0, linha.length() ); //stop
+              }else{
+                found = linha.find("\t");
+                operacao = linha.substr(0, found);
+              }
+              if(operacao == operando1){
+                operando1 = operando2;
+                operando2.erase(operando2.begin(), operando2.end());
+              }
+              //cout<<i<<"\t"<<linha<<endl;
+              //i++;
+              //cout<<"op "<<operacao<<endl;
+              //cout<<"op1 "<<operando1<<endl;
+              //cout<<"op2 "<<operando2<<endl;
+                      /*num_op = descobreinstrucao(operacao);
+                      num_dir = descobrediretiva(operacao);
+                      if (num_dir == 3) {
+                      if (strcmp(operando1,"text") == 0) {
+                      secao = 0;
+                    }
+                    else if (strcmp(operando1,"data") == 0) {
+                    secao = 1;
+                  }
+                  else if (strcmp(operando1,"bss") == 0) {
+                  secao = 2;
+                }
+              }
+              converteia32(num_op, num_dir, entrada, saida, rotulo, operacao, operando1, operando2, adicionado, mudaop, mudaadic, mudarot, secao);
+              parametro = 1;
+              mudarot = 0; mudaop = 0; mudaop1 = 0; mudaop2 = 0; mudaadic = 0;
+              cout << endl;*/
+              operacao.erase(operacao.begin(), operacao.end());
+              operando1.erase(operando1.begin(), operando1.end());
+              operando2.erase(operando2.begin(), operando2.end());
           }
-          /*num_op = descobreinstrucao(operacao);
-          num_dir = descobrediretiva(operacao);
-          if (num_dir == 3) {
-            if (strcmp(operando1,"text") == 0) {
-              secao = 0;
-            }
-            else if (strcmp(operando1,"data") == 0) {
-              secao = 1;
-            }
-            else if (strcmp(operando1,"bss") == 0) {
-              secao = 2;
-            }
-          }
-          converteia32(num_op, num_dir, entrada, saida, rotulo, operacao, operando1, operando2, adicionado, mudaop, mudaadic, mudarot, secao);
-          parametro = 1;
-          mudarot = 0; mudaop = 0; mudaop1 = 0; mudaop2 = 0; mudaadic = 0;
-          cout << endl;*/
       }
       fs1.close();
       fs2.close();
