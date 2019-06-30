@@ -2,7 +2,7 @@ section	.	text
 global _start
 _start:
 	push  eax
-	mov  eax, [b]
+	mov  eax, [b	a]
 	mov [a] ,eax
 	pop  eax
 	push eax
@@ -277,6 +277,7 @@ section	.	bss
 	string_in	resb	100
 	b	resd	1
 	h	resd	1
+	r	resd	2
 section	.	data
 	msg_input	db	'input: ' 
 	tam_msgin	EQU	$-msg_input
@@ -294,3 +295,4 @@ section	.	data
 	tam_endl	EQU	$-endl
 	msgoverflow	db	'OVERFLOW!'
 	tam_msgover	EQU	$-msgoverflow
+	dois	dd	2

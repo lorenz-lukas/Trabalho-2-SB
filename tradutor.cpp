@@ -498,7 +498,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "mov  ebx,  0"<< endl;
         fs << "\t" << "mov  ecx,  [ebp+12]"<< endl;
         fs << "\t" << "mov  edx,  100"<< endl;
-        fs << "\t" << "int  80h"<< endl;
+        fs << "\t" << "int  80h"   << endl;
         fs << "\t" << "mov  ecx,  [ebp+12]"<< endl;
         fs << "\t" << "mov  al,  [ecx]"<< endl;
         fs << "\t" << "mov  ebx,  [ebp+8]"<< endl;
@@ -618,15 +618,16 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
       }
       else if (num_op == 0 && num_dir !=0) {
             if (num_dir == 1) { // space
-              if (operando1.length()==0) { // vetor
+              if (operando1.length() == 0) { // vetor
                 fs << "\t" << rotulo << "\tresd\t" << "1"<< endl;
               }
               else {
-                fs << "\t" << rotulo << "\tresd\t" << operacao << endl;
+                cout<<operando1<<endl;
+                fs << "\t" << rotulo << "\tresd\t" << operando1 << endl;
               }
             }
             else if (num_dir == 2) {
-              fs << "\t" << rotulo << "\tdd\t" << operando1<< endl;
+              fs << "\t" << rotulo << "\tdd\t" << operando1 << endl;
             }
             else if (num_dir == 3) { // section
               fs << operacao << "\t.\t" << operando1<< endl;
@@ -701,10 +702,11 @@ int main (int argc, char *argv[]){
                   std::size_t found_primeiro_espaco = linha.find("\t",0);
                   if(found_primeiro_espaco!=std::string::npos){
                       std::size_t found_segundo_espaco = linha.find("\t",found_primeiro_espaco+1);// Checa se tem mais de um argumento
-                      if(found_dois_pontos!=std::string::npos)operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                      if(found_dois_pontos!=std::string::npos)
+                          operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco);
                       else operacao = linha.substr(0, found_primeiro_espaco);
                       if(found_segundo_espaco!=std::string::npos){
-                          operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco-5);
+                          operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco);
                           operando2 = linha.substr(found_segundo_espaco+1, linha.length() );
                       }else{
                           operando1 = linha.substr(found_primeiro_espaco+1, linha.length() );
@@ -718,11 +720,14 @@ int main (int argc, char *argv[]){
               if(operacao == operando1){
                   operando1 = operando2;
                   operando2.erase(operando2.begin(), operando2.end());
+                  std::size_t found_primeiro_espaco = operacao.find("\t",0);
+                  if(found_primeiro_espaco!=std::string::npos)
+                      operacao = operacao.substr(0,found_primeiro_espaco);
                   operacao.erase(std::remove(operacao.begin(), operacao.end(), '\t'), operacao.end());
               }
               cout<<i<<"\t"<<linha<<endl;
               i++;
-              cout<<"op "<<operacao<<endl;
+              cout<<"op  "<<operacao<<endl;
               cout<<"op1 "<<operando1<<endl;
               cout<<"op2 "<<operando2<<endl;
               op = instrucao(operacao);
