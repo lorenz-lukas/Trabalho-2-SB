@@ -10,6 +10,6 @@ stop
 section	bss
 b:	space
 h:	space
-r:	space
+r:	space	2
 section	data
 dois:	const	2
