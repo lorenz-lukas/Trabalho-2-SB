@@ -307,14 +307,14 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "push " << "eax" << endl;
         fs << "\t" << "call " << "input" << endl;
         fs << "\t" << "mov [" << operando1 << "], eax" << endl;
-        fs << "\t" << "pop " << "eax" << endl;
         fs << "\t" << "pop  eax" << endl;
+        //fs << "\t" << "pop  eax" << endl;
       }
       else if (num_op == 13) { // output
         fs << "\t" << "push  eax" << endl;
-        fs << "\t" << "push " << "eax" << endl;
+        //fs << "\t" << "push  eax" << endl;
         fs << "\t" << "push num_input" << endl;
-        fs << "\t" << "push " << "dword, [" << operando1 << "]" << endl;
+        fs << "\t" << "push " << "dword [" << operando1 << "]" << endl;
         fs << "\t" << "mov eax, 4" << endl;
         fs << "\t" << "mov ebx, 1" << endl;
         fs << "\t" << "mov ecx, msg_output" << endl;
@@ -327,7 +327,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "mov  edx,  tam_endl"<<endl;
         fs << "\t" << "int  80h" << endl;
         fs << "\t" << "pop  eax" << endl;
-        fs << "\t" << "pop eax" << endl;
+        //fs << "\t" << "pop  eax" << endl;
       }
       else if (num_op == 14) { // stop ou return 0
         fs << "fim_prog:" << endl;
@@ -560,7 +560,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "push" << operando1 << endl ;
         fs << "\t" << "call  c_input"<< endl ;
         fs << "\t" << "pop  eax"<< endl;
-        fs << "\t" << "pop  eax"<< endl;
+        //fs << "\t" << "pop  eax"<< endl;
       }
       else if (num_op == 16)  { // c_output
         fs << "\t" << "push  eax"<< endl;
@@ -578,7 +578,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "mov  edx,  tam_endl"<< endl;
         fs << "\t" << "int  80h"<< endl;
         fs << "\t" << "pop  eax"<< endl;
-        fs << "\t" << "pop  eax"<< endl;
+        //fs << "\t" << "pop  eax"<< endl;
       }
       else if (num_op == 19) { //s_input
         fs << "\t" << "push  eax"<< endl;
@@ -594,7 +594,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "push  ecx"<< endl;
         fs << "\t" << "call  s_input"<< endl;
         fs << "\t" << "pop  eax"<< endl;
-        fs << "\t" << "pop  eax"<< endl;
+        //fs << "\t" << "pop  eax"<< endl;
       }
       else if (num_op == 20) { // s_output
         fs << "\t" << "push  eax"<< endl;
@@ -614,7 +614,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
         fs << "\t" << "mov  edx,  tam_endl"<< endl;
         fs << "\t" << "int  80h"<< endl;
         fs << "\t" << "pop  eax"<< endl;
-        fs << "\t" << "pop  eax"<< endl;
+        //fs << "\t" << "pop  eax"<< endl;
       }
       else if (num_op == 0 && num_dir !=0) {
             if (num_dir == 1) { // space
@@ -622,7 +622,6 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
                 fs << "\t" << rotulo << "\tresd\t" << "1"<< endl;
               }
               else {
-                cout<<operando1<<endl;
                 fs << "\t" << rotulo << "\tresd\t" << operando1 << endl;
               }
             }
@@ -630,7 +629,7 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
               fs << "\t" << rotulo << "\tdd\t" << operando1 << endl;
             }
             else if (num_dir == 3) { // section
-              fs << operacao << "\t.\t" << operando1<< endl;
+              fs << operacao << "\t\t." << operando1<< endl;
               if (operando1 == "data"){
                 fs << "\t" << "msg_input\tdb\t'input: ' "<< endl;
                 fs << "\t" << "tam_msgin\tEQU\t$-msg_input"<< endl;
@@ -665,12 +664,13 @@ void convertePseudoAssemblyIA32(int num_op, int num_dir, std::ofstream& fs,strin
 
 int main (int argc, char *argv[]){
 
-  int i=0, parametro=1, mudaadic=0, mudarot=0, mudaop=0, mudaop1=0, mudaop2=0, num_op, num_dir, letrint, secao=0;
+  int i=0,j=1, parametro=1, secao=0;
   int num_space=0, op = 0, dir = 0;
   char letra;
   bool ok = false;
   string arquivo_input, arquivo_output, arquivo_precomp, linha, token;
   string rotulo, operacao,operando1, operando2, adicionado;
+
   if(argc != 2) {
     cout<< "[ERROR] Input parameters must be 2.\nExample: ./tradutor entrada.asm" << endl;
     return 0;
@@ -700,16 +700,23 @@ int main (int argc, char *argv[]){
                   size_t found_dois_pontos = linha.find(":",0);// Acha se tem rotulo
                   if(found_dois_pontos!=std::string::npos)rotulo = linha.substr(0, found_dois_pontos);
                   std::size_t found_primeiro_espaco = linha.find("\t",0);
+
+                  for(i=found_primeiro_espaco; int(linha[i]) < 48 ; i++); // primeira letra após espaco
+
                   if(found_primeiro_espaco!=std::string::npos){
-                      std::size_t found_segundo_espaco = linha.find("\t",found_primeiro_espaco+1);// Checa se tem mais de um argumento
+                      std::size_t found_segundo_espaco = linha.find("\t", i);// Checa se tem mais de um argumento
+
                       if(found_dois_pontos!=std::string::npos)
-                          operacao = linha.substr(found_primeiro_espaco+1, found_segundo_espaco);
+                          operacao = linha.substr( i, found_segundo_espaco);
                       else operacao = linha.substr(0, found_primeiro_espaco);
-                      if(found_segundo_espaco!=std::string::npos){
-                          operando1 = linha.substr(found_primeiro_espaco+1, found_segundo_espaco);
-                          operando2 = linha.substr(found_segundo_espaco+1, linha.length() );
-                      }else{
-                          operando1 = linha.substr(found_primeiro_espaco+1, linha.length() );
+
+                      if(found_segundo_espaco!=std::string::npos){ /// dois argumentos
+                          operando1 = linha.substr( i, found_segundo_espaco);
+                          for(i=found_segundo_espaco; int(linha[i]) < 48 ; i++);
+                          for(int k = i; k < linha.length(); k++);
+                          operando2 = linha.substr( i, linha.length() );
+                      }else{ // um argumento
+                          operando1 = linha.substr(i, linha.length() );
                       }
                   }else operacao = linha.substr(0, linha.length() ); //stop
               }else{
@@ -725,8 +732,12 @@ int main (int argc, char *argv[]){
                       operacao = operacao.substr(0,found_primeiro_espaco);
                   operacao.erase(std::remove(operacao.begin(), operacao.end(), '\t'), operacao.end());
               }
-              cout<<i<<"\t"<<linha<<endl;
-              i++;
+              if(operando2.length()>0){
+                for(i=0; int(linha[i]) > 48 ; i++);
+                if((i-2)>0) operando1 = operando1.substr(0,i-2);
+              }
+              cout<<j<<"\t"<<linha<<endl;
+              j++;
               cout<<"op  "<<operacao<<endl;
               cout<<"op1 "<<operando1<<endl;
               cout<<"op2 "<<operando2<<endl;
@@ -734,7 +745,7 @@ int main (int argc, char *argv[]){
               dir = diretivas(operacao);
               //cout<<op<<endl;
               //cout<<dir<<endl;
-              //cout<<"------------"<<endl;
+              cout<<"------------"<<endl;
               if (dir == 3) {
                   if (operando1 == "text"){
                       secao = 0;

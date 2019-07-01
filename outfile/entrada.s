@@ -1,8 +1,8 @@
-section	.	text
+section		.text
 global _start
 _start:
 	push  eax
-	mov  eax, [b	a]
+	mov  eax, [b	]
 	mov [a] ,eax
 	pop  eax
 	push eax
@@ -21,7 +21,6 @@ _start:
 	push eax
 	call input
 	mov [b], eax
-	pop eax
 	pop  eax
 	push eax
 	mov eax, 4
@@ -39,15 +38,13 @@ _start:
 	push eax
 	call input
 	mov [h], eax
-	pop eax
 	pop  eax
 	mov eax, [b]
 	add eax, [h]
 	mov [r], eax
 	push  eax
-	push eax
 	push num_input
-	push dword, [r]
+	push dword [r]
 	mov eax, 4
 	mov ebx, 1
 	mov ecx, msg_output
@@ -60,7 +57,6 @@ _start:
 	mov  edx,  tam_endl
 	int  80h
 	pop  eax
-	pop eax
 fim_prog:
 	mov eax,  1
 	mov ebx, 0
@@ -271,14 +267,14 @@ nao_overflow:
 
 
 
-section	.	bss
+section		.bss
 	num_input resb 10
 	char_in	resb	1
 	string_in	resb	100
 	b	resd	1
 	h	resd	1
 	r	resd	2
-section	.	data
+section		.data
 	msg_input	db	'input: ' 
 	tam_msgin	EQU	$-msg_input
 	msg_output	db	'output: ' 
